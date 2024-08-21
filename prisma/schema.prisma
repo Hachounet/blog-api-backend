@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String    @id @default(uuid())
+  email    String    @unique
+  pseudo   String    @unique
+  hash     String
+  warnings Int       @default(0)
+  enabled  Boolean   @default(true)
+  role     Role      @default(BASIC)
+  posts    Post[]
+  comments Comment[]
+  likes    Like[]
+}
+
+model Post {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
+  Comment   Comment[]
+  published Boolean   @default(false)
+}
+
+model Comment {
+  id         String    @id @default(uuid())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  content    String
+  author     User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId   String
+  post       Post      @relation(fields: [postId], references: [id])
+  postId     String
+  authorized Boolean   @default(false)
+  Children   Comment[] @relation("Comment_Children")
+  parent     Comment?  @relation("Comment_Children", fields: [parentId], references: [id])
+  parentId   String?
+  Like       Like[]
+
+  @@index([parentId])
+}
+
+model Like {
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  commentId String
+
+  @@id([userId, commentId])
+}
+
+enum Role {
+  BASIC
+  EDITOR
+  ADMIN
+}
