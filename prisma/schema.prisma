@@ -32,8 +32,17 @@ model Post {
   updatedAt DateTime  @updatedAt
   author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId  String
+  title     String
+  Content   String
   Comment   Comment[]
   published Boolean   @default(false)
+}
+
+model PageContent {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  content   String
 }
 
 model Comment {

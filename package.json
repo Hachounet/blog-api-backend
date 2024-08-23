@@ -2,7 +2,10 @@
   "name": "template",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "scripts": {
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
@@ -17,8 +20,9 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.18.0",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "connect-pg-simple": "^9.0.1",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "debug": "^4.3.6",
     "dotenv": "^16.4.5",
