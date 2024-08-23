@@ -1,7 +1,11 @@
+const dotenv = require("dotenv");
+dotenv.config();
+
 const express = require("express");
 // const passport = require("passport");
 const path = require("path");
 const helmet = require("helmet");
+const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const fs = require("fs");
 const https = require("https");
@@ -26,13 +30,14 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(helmet());
-
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
-// require("./db/passport");
-// app.use(passport.initialize());
+require("./auth/passport");
+const passport = require("passport");
+app.use(passport.initialize());
 
 app.use("/", indexRouter);
 // app.use("/posts", postsRouter);
