@@ -1,29 +1,44 @@
-// const { Router } = require("express");
+const { Router } = require("express");
 
-// const dashboardRouter = Router();
+const dashboardRouter = Router();
 
-// dashboardRouter.get("/", getDashboardPage);
+const {
+  getDashboardPage,
+  getCreatePostPage,
+  postCreatePostPage,
+  getAllPostsPage,
+  getCommentsPage,
+  postCommentsPage,
+  getDeletePage,
+  postDeletePage,
+  getUpdatePostPage,
+  postUpdatePostPage,
+} = require("../controllers/dashboardController");
 
-// dashboardRouter.get("/login", getDashboardLoginPage);
+const authenticateJWT = require("../auth/passport");
+const { isEditor } = require("../auth/editorMiddleware");
 
-// dashboardRouter.post("/login", postDashboardLoginPage);
+dashboardRouter.use(authenticateJWT);
+dashboardRouter.use(isEditor);
 
-// dashboardRouter.get("/logout", getDashboardLogOutPage);
+dashboardRouter.get("/", getDashboardPage);
 
-// dashboardRouter.post("/logout", postDashboardLogOutPage);
+dashboardRouter.get("/create", getCreatePostPage);
 
-// dashboardRouter.get("/create", getCreatePostPage);
+dashboardRouter.post("/create", postCreatePostPage);
 
-// dashboardRouter.post("/create", postCreatePostPage);
+dashboardRouter.get("/all", getAllPostsPage);
 
-// dashboardRouter.get("/all", getAllPostsPage);
+dashboardRouter.get("/comments", getCommentsPage);
 
-// dashboardRouter.get("/comments", getCommentsPage);
+dashboardRouter.post("/comments", postCommentsPage);
 
-// dashboardRouter.post("/comments", postCommentsPage);
+dashboardRouter.get("/delete", getDeletePage);
 
-// dashboardRouter.get("/delete", getDeletePage);
+dashboardRouter.post("/delete", postDeletePage);
 
-// dashboardRouter.post("/delete", postDeletePage);
+dashboardRouter.get("/:postId/update", getUpdatePostPage);
 
-// dashboardRouter.get("/:postId/update");
+dashboardRouter.post("/:postId/update", postUpdatePostPage);
+
+module.exports = dashboardRouter;
