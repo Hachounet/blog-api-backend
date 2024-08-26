@@ -13,6 +13,8 @@ const {
   getProfilePage,
 } = require("../controllers/indexController");
 
+const authenticateJWT = require("../auth/passport");
+
 const indexRouter = Router();
 
 indexRouter.get("/", getLandingPage);
@@ -31,10 +33,6 @@ indexRouter.get("/signup", getSignUpPage);
 
 indexRouter.post("/signup", postSignUpPage);
 
-indexRouter.get(
-  "/profile",
-  passport.authenticate("jwt", { session: false }),
-  getProfilePage,
-);
+indexRouter.get("/profile", authenticateJWT, getProfilePage);
 
 module.exports = indexRouter;

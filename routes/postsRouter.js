@@ -1,11 +1,26 @@
-// const { Router } = require("express");
+const { Router } = require("express");
 
-// const postsRouter = Router();
+const postsRouter = Router();
 
-// postsRouter.get("/", getAllPosts);
+const {
+  getAllPosts,
+  getSpecificPostPage,
+  getSpecificPostPageComments,
+  postCommentAndLikesOnSpecificPostPage,
+} = require("../controllers/postsController");
 
-// postsRouter.get("/:postId", getSpecificPostPage);
+const authenticateJWT = require("../auth/passport");
 
-// postsRouter.get("/:postId/comments/:commentsPage", getSpecificPostPageComments);
+postsRouter.get("/", getAllPosts);
 
-// postsRouter.post("/:postId", postCommentLikesSpecificPostPage);
+postsRouter.get("/:postId", getSpecificPostPage);
+
+postsRouter.get("/:postId/comments/:commentsPage", getSpecificPostPageComments);
+
+postsRouter.post(
+  "/:postId",
+  authenticateJWT,
+  postCommentAndLikesOnSpecificPostPage,
+);
+
+module.exports = postsRouter;

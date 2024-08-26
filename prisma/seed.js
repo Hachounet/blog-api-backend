@@ -2,205 +2,91 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function main() {
-  // Créer ou mettre à jour les utilisateurs Alice et Bob
-  const alice = await prisma.user.upsert({
-    where: { email: "alice@prisma.io" },
-    update: {},
-    create: {
+  // Create users Alice and Bob
+  const alice = await prisma.user.create({
+    data: {
       email: "alice@prisma.io",
       pseudo: "alice123",
-      hash: "hashedpassword1", // Remplacez ceci par le vrai hash de mot de passe
+      hash: "hashedpassword1", // Replace with actual hashed password
       role: "BASIC",
     },
   });
 
-  const bob = await prisma.user.upsert({
-    where: { email: "bob@prisma.io" },
-    update: {},
-    create: {
+  const bob = await prisma.user.create({
+    data: {
       email: "bob@prisma.io",
       pseudo: "bob456",
-      hash: "hashedpassword2", // Remplacez ceci par le vrai hash de mot de passe
+      hash: "hashedpassword2", // Replace with actual hashed password
       role: "BASIC",
     },
   });
 
-  // Créer des posts pour Alice
+  // Create a post for Alice
   const post1 = await prisma.post.create({
     data: {
       title: "Check out Prisma with Next.js",
       Content: "https://www.prisma.io/nextjs",
       published: true,
-      author: {
-        connect: { email: "alice@prisma.io" }, // Liaison du post à Alice
-      },
+      authorId: alice.id, // Link the post to Alice
     },
   });
 
+  // Create a post for Bob
   const post2 = await prisma.post.create({
     data: {
       title: "Getting started with Prisma",
       Content: "Prisma is a great tool to work with databases in Node.js.",
       published: true,
-      author: {
-        connect: { email: "alice@prisma.io" }, // Liaison du post à Alice
-      },
+      authorId: bob.id, // Link the post to Bob
     },
   });
 
-  // Créer des posts pour Bob
-  const post3 = await prisma.post.create({
-    data: {
-      title: "Follow Prisma on Twitter",
-      Content: "https://twitter.com/prisma",
-      published: true,
-      author: {
-        connect: { email: "bob@prisma.io" }, // Liaison du post à Bob
+  // Create 20 comments on post1, some with replies
+  for (let i = 1; i <= 20; i++) {
+    const comment = await prisma.comment.create({
+      data: {
+        content: `Comment ${i} on Post 1`,
+        authorized: true,
+        postId: post1.id,
+        authorId: bob.id, // Bob is the author of all these comments
       },
-    },
-  });
+    });
 
-  const post4 = await prisma.post.create({
-    data: {
-      title: "Follow Nexus on Twitter",
-      Content: "https://twitter.com/nexusgql",
-      published: true,
-      author: {
-        connect: { email: "bob@prisma.io" }, // Liaison du post à Bob
-      },
-    },
-  });
-
-  // Ajouter des commentaires aux posts
-  await prisma.comment.create({
-    data: {
-      content: "Great article! Very informative.",
-      post: {
-        connect: { id: post1.id }, // Liaison du commentaire au post1
-      },
-      author: {
-        connect: { email: "bob@prisma.io" }, // Liaison du commentaire à Bob
-      },
-    },
-  });
-
-  await prisma.comment.create({
-    data: {
-      content: "Thanks for sharing, Alice!",
-      post: {
-        connect: { id: post1.id },
-      },
-      author: {
-        connect: { email: "bob@prisma.io" },
-      },
-    },
-  });
-
-  await prisma.comment.create({
-    data: {
-      content: "I agree, Prisma is awesome!",
-      post: {
-        connect: { id: post2.id }, // Liaison du commentaire au post2
-      },
-      author: {
-        connect: { email: "bob@prisma.io" }, // Liaison du commentaire à Bob
-      },
-    },
-  });
-
-  await prisma.comment.create({
-    data: {
-      content: "Looking forward to trying this out.",
-      post: {
-        connect: { id: post2.id },
-      },
-      author: {
-        connect: { email: "bob@prisma.io" },
-      },
-    },
-  });
-
-  await prisma.comment.create({
-    data: {
-      content: "Done! Already following.",
-      post: {
-        connect: { id: post3.id }, // Liaison du commentaire au post3
-      },
-      author: {
-        connect: { email: "alice@prisma.io" }, // Liaison du commentaire à Alice
-      },
-    },
-  });
-
-  await prisma.comment.create({
-    data: {
-      content: "Prisma updates are always helpful.",
-      post: {
-        connect: { id: post3.id },
-      },
-      author: {
-        connect: { email: "alice@prisma.io" },
-      },
-    },
-  });
-
-  await prisma.comment.create({
-    data: {
-      content: "Nexus is a great project too!",
-      post: {
-        connect: { id: post4.id }, // Liaison du commentaire au post4
-      },
-      author: {
-        connect: { email: "alice@prisma.io" }, // Liaison du commentaire à Alice
-      },
-    },
-  });
-
-  await prisma.comment.create({
-    data: {
-      content: "Excited to see more content from Nexus.",
-      post: {
-        connect: { id: post4.id },
-      },
-      author: {
-        connect: { email: "alice@prisma.io" },
-      },
-    },
-  });
-
-  // Ajouter le contenu de la page "About Us"
+    // Create 2 replies to each comment
+    for (let j = 1; j <= 2; j++) {
+      await prisma.comment.create({
+        data: {
+          content: `Reply ${j} to Comment ${i}`,
+          authorized: true,
+          postId: post1.id,
+          parentId: comment.id, // Link this as a reply to the above comment
+          authorId: alice.id, // Alice replies to Bob's comments
+        },
+      });
+    }
+  }
+  // Add the content for the "About Us" page
   const aboutUsContent = await prisma.pageContent.upsert({
-    where: { id: "about-us" }, // Vous pouvez utiliser un slug ou un identifiant unique
+    where: { id: "about-us" },
     update: {
-      content: "Nous sommes une entreprise dédiée à l'excellence.", // Mettez à jour le contenu si nécessaire
+      content: "Nous sommes une entreprise dédiée à l'excellence.", // Update the content if necessary
     },
     create: {
-      id: "about-us", // ID unique pour la page About Us
-      content: "Nous sommes une entreprise dédiée à l'excellence.", // Contenu de la page About Us
+      id: "about-us", // Unique ID for the About Us page
+      content: "Nous sommes une entreprise dédiée à l'excellence.", // Content for the About Us page
     },
   });
 
-  // Ajouter le contenu de la page "Contact"
+  // Add the content for the "Contact" page
   const contactContent = await prisma.pageContent.upsert({
-    where: { id: "contact" }, // ID unique pour la page Contact
+    where: { id: "contact" },
     update: {
-      content: "Contactez-nous pour plus d'informations.", // Mettez à jour le contenu si nécessaire
+      content: "Contactez-nous pour plus d'informations.", // Update the content if necessary
     },
     create: {
-      id: "contact", // ID unique pour la page Contact
-      content: "Contactez-nous pour plus d'informations.", // Contenu de la page Contact
+      id: "contact", // Unique ID for the Contact page
+      content: "Contactez-nous pour plus d'informations.", // Content for the Contact page
     },
-  });
-
-  console.log({
-    alice,
-    bob,
-    post1,
-    post2,
-    post3,
-    post4,
-    aboutUsContent,
-    contactContent,
   });
 }
 

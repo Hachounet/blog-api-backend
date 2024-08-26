@@ -40,7 +40,7 @@ const passport = require("passport");
 app.use(passport.initialize());
 
 app.use("/", indexRouter);
-// app.use("/posts", postsRouter);
+app.use("/posts", postsRouter);
 // app.use("/dashboard", dashboardRouter);
 
 // Err handling
