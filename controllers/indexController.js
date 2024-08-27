@@ -67,6 +67,8 @@ exports.getLandingPage = asyncHandler(async (req, res, next) => {
       createdAt: "desc", // Trier par date de création (ordre décroissant)
     },
     select: {
+      id: true,
+      createdAt: true,
       title: true,
       author: {
         select: {
