@@ -2,7 +2,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
-const jwt = require("jsonwebtoken");
+
 
 exports.getAllPosts = asyncHandler(async (req, res, next) => {
   console.log("All posts page");
