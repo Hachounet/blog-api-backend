@@ -16,10 +16,10 @@ const dashboardRouter = require("./routes/dashboardRouter");
 
 const app = express();
 
-const options = {
-  key: fs.readFileSync(process.env.SSL_KEY_PATH || "key.pem"),
-  cert: fs.readFileSync(process.env.SSL_CERT_PATH || "cert.pem"),
-};
+// const options = {
+//   key: fs.readFileSync(process.env.SSL_KEY_PATH || "key.pem"),
+//   cert: fs.readFileSync(process.env.SSL_CERT_PATH || "cert.pem"),
+// }; DISABLED FOR ADAPTABLE.IO
 
 const corsOptions = {
   origin: process.env.ALLOWED_ORIGINS || "*",
@@ -66,6 +66,10 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
-https.createServer(options, app).listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// https.createServer(options, app).listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+// }); DELETE app.listen AND UNCOMMENT THIS TO HAVE HTTPS SERV
+
+app.listen(PORT, () => {
+  console.log(`Server launched on port ${PORT}`);
 });
