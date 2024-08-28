@@ -94,35 +94,35 @@ exports.getLoginPage = (req, res, next) => {
 
 exports.postLoginPage = asyncHandler(async (req, res, next) => {
   console.log("POST Login Page");
-  try {
-    // Check if user exists
-    const userExists = await prisma.user.findUnique({
-      where: { email: req.body.email },
-    });
-    if (!userExists) {
-      return res.status(400).json({ message: "Invalid email." });
-    }
 
-    const match = await bcrypt.compare(req.body.pw, userExists.hash);
+  const error = {};
 
-    if (!match) {
-      return res.status(400).json({ message: "Incorrect password." });
-    }
+  // Check if user exists
+  const userExists = await prisma.user.findUnique({
+    where: { email: req.body.email },
+  });
 
-    // Generate token
-    const accessToken = jwt.sign(
-      { id: userExists.id },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1d",
-      },
-    );
-    return res
-      .status(200)
-      .json({ message: "User logged in", accessToken: accessToken });
-  } catch (err) {
-    next(err);
+  if (!userExists) {
+    error.mailError = "Invalid email.";
+    return res.status(400).json({ errors: error });
   }
+
+  // Compare the password
+  const match = await bcrypt.compare(req.body.pw, userExists.hash);
+
+  if (!match) {
+    error.pwError = "Invalid password.";
+    return res.status(400).json({ errors: error });
+  }
+
+  // Generate token
+  const accessToken = jwt.sign({ id: userExists.id }, process.env.JWT_SECRET, {
+    expiresIn: "1d",
+  });
+
+  return res
+    .status(200)
+    .json({ message: "User logged in", accessToken: accessToken });
 });
 
 exports.getProfilePage = asyncHandler(async (req, res, next) => {
