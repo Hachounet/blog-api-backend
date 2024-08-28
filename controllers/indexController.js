@@ -131,20 +131,8 @@ exports.postLoginPage = asyncHandler(async (req, res, next) => {
 });
 
 exports.getProfilePage = asyncHandler(async (req, res, next) => {
-  try {
-    // Check if user exists
-    const userExists = await prisma.user.findUnique({
-      where: { email: req.body.email },
-    });
-    if (!userExists) {
-      return res.status(400).json({ message: "User does not exists" });
-    }
-    return res
-      .status(200)
-      .json({ userId: userExists.id, email: userExists.email });
-  } catch (err) {
-    next(err);
-  }
+  res.json({ message: "Access granted.", user: req.user });
+  // No need to ask DB about user because authenticateJWT did it before
 });
 
 exports.getLogOutPage = (req, res, next) => {

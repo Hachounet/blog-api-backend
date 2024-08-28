@@ -14,6 +14,9 @@ passport.use(
     try {
       const user = await prisma.user.findUnique({ where: { id: payload.id } });
       if (user) return done(null, user);
+      else {
+        return done(null, false); // If user not found, will respond with 401 err
+      }
     } catch (err) {
       return done(err);
     }
