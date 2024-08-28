@@ -3,7 +3,6 @@ const prisma = new PrismaClient();
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
 
-
 exports.getAllPosts = asyncHandler(async (req, res, next) => {
   console.log("All posts page");
   try {
@@ -13,8 +12,11 @@ exports.getAllPosts = asyncHandler(async (req, res, next) => {
         createdAt: "desc",
       },
       select: {
+        id: true,
+        createdAt: true,
         title: true,
         published: true,
+
         author: {
           select: {
             pseudo: true,
