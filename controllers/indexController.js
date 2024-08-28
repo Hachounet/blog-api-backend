@@ -124,7 +124,7 @@ exports.postLoginPage = asyncHandler(async (req, res, next) => {
 
   // Générer le token si aucune erreur n'est trouvée
   const accessToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-    expiresIn: "1d",
+    expiresIn: "120000",
   });
 
   return res.status(200).json({ message: "User logged in", accessToken });
