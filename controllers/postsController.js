@@ -55,7 +55,9 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
           take: 10,
         },
         author: {
-          pseudo: true,
+          select: {
+            pseudo: true,
+          },
         },
       },
     });
