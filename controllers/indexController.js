@@ -138,6 +138,7 @@ exports.getProfilePage = asyncHandler(async (req, res, next) => {
 exports.getLogOutPage = (req, res, next) => {
   console.log("GET Log Out Page");
   res.json({ message: "Do you really want to leave ?" });
+  // TO DELETE, NO NEED TO THIS ENDPOINT
 };
 
 exports.postLogOutPage = (req, res, next) => {

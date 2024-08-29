@@ -54,6 +54,9 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
         Comment: {
           take: 10,
         },
+        author: {
+          pseudo: true,
+        },
       },
     });
 
