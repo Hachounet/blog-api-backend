@@ -67,8 +67,15 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
         postId: req.params.postId,
         authorized: true,
       },
+      include: {
+        author: {
+          select: {
+            pseudo: true,
+          },
+        },
+      },
       orderBy: {
-        createdAt: "desc",
+        createdAt: "asc",
       },
       take: 10,
     });
@@ -115,7 +122,7 @@ exports.getSpecificPostPageComments = asyncHandler(async (req, res, next) => {
         authorized: true,
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: "asc",
       },
       skip: page * limit,
       take: limit,
