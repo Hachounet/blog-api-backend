@@ -48,6 +48,11 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
       where: { id: commentId },
       include: {
         Children: true, // Inclut tous les enfants de ce commentaire
+        author: {
+          select: {
+            pseudo: true,
+          },
+        },
       },
     });
 
