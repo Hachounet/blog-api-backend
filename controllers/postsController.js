@@ -44,44 +44,45 @@ exports.getAllPosts = asyncHandler(async (req, res, next) => {
 
 exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
   async function fetchCommentsWithChildren(commentId) {
-    const includeLikes = req.user?.id
+    const includeUserLikes = req.user?.id
       ? {
           Likes: {
             where: {
               userId: req.user.id,
             },
             select: {
-              id: true,
+              id: true, // Selecting the ID to check if the user has liked the comment
             },
           },
         }
-      : {}; // Include Likes if the user is logged in, otherwise an empty object
+      : {};
 
     const comment = await prisma.comment.findUnique({
       where: { id: commentId },
       include: {
-        Children: true, // Include all children of this comment
+        Children: true,
         author: {
           select: {
             pseudo: true,
           },
         },
         _count: {
-          // Get the count of likes
           select: {
-            Like: true,
+            Like: true, // Always get the total number of likes
           },
         },
-        ...includeLikes, // Spread the includeLikes object
+        ...includeUserLikes,
       },
     });
 
-    // If the comment is not found, return null
     if (!comment) {
-      return null; // Or throw an error if preferred
+      return null;
     }
 
-    // If the comment has children, call this function recursively on each child
+    // Add a `userHasLiked` flag if the user is logged in
+    comment.userHasLiked = req.user?.id ? comment.Likes.length > 0 : false;
+
+    // Recursively fetch children comments
     if (comment.Children.length > 0) {
       comment.Children = await Promise.all(
         comment.Children.map((child) => fetchCommentsWithChildren(child.id)),
@@ -92,7 +93,7 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
   }
 
   try {
-    const includeLikes = req.user?.id
+    const includeUserLikes = req.user?.id
       ? {
           Likes: {
             where: {
@@ -103,7 +104,7 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
             },
           },
         }
-      : {}; // Include Likes if the user is logged in, otherwise an empty object
+      : {};
 
     const comments = await prisma.comment.findMany({
       where: {
@@ -113,7 +114,7 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
       include: {
         _count: {
           select: {
-            Like: true,
+            Like: true, // Always get the total number of likes
           },
         },
         author: {
@@ -121,7 +122,7 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
             pseudo: true,
           },
         },
-        ...includeLikes, // Spread the includeLikes object
+        ...includeUserLikes,
       },
       orderBy: {
         createdAt: "asc",
@@ -129,12 +130,17 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
       take: 10,
     });
 
-    // Retrieve children recursively for each root comment
+    // Process each comment to add `userHasLiked` flag
     const commentsWithChildren = await Promise.all(
-      comments.map((comment) => fetchCommentsWithChildren(comment.id)),
+      comments.map(async (comment) => {
+        const commentWithChildren = await fetchCommentsWithChildren(comment.id);
+        commentWithChildren.userHasLiked = req.user?.id
+          ? commentWithChildren.Likes.length > 0
+          : false;
+        return commentWithChildren;
+      }),
     );
 
-    // Filter out any null comments (in case any weren't found)
     const filteredCommentsWithChildren = commentsWithChildren.filter(
       (comment) => comment !== null,
     );
