@@ -59,17 +59,24 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
             Like: true,
           },
         },
-        Likes: {
-          // Check if the current user liked this comment
-          where: {
-            userId: req.user.id,
-          },
-          select: {
-            id: true,
-          },
-        },
+        Likes: req.user.id
+          ? {
+              // Check if the current user liked this comment only if the user is logged in
+              where: {
+                userId: req.user.id,
+              },
+              select: {
+                id: true,
+              },
+            }
+          : false, // If the user is not logged in, we skip fetching Likes
       },
     });
+
+    // If the comment is not found, return null
+    if (!comment) {
+      return null; // Or throw an error if preferred
+    }
 
     // If the comment has children, call this function recursively on each child
     if (comment.Children.length > 0) {
@@ -81,7 +88,7 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
     return comment;
   }
 
-  const potentialUser = req.user.id ? req.user.id : "unlogged";
+  const potentialUser = req.user?.id || "unlogged"; // Handle potential undefined user ID
 
   try {
     const comments = await prisma.comment.findMany({
@@ -100,14 +107,17 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
             pseudo: true,
           },
         },
-        Likes: {
-          where: {
-            userId: req.user.id,
-          },
-          select: {
-            id: true,
-          },
-        },
+        Likes: req.user.id
+          ? {
+              // Fetch Likes only if the user is logged in
+              where: {
+                userId: req.user.id,
+              },
+              select: {
+                id: true,
+              },
+            }
+          : false, // If not logged in, skip fetching Likes
       },
       orderBy: {
         createdAt: "asc",
@@ -118,6 +128,11 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
     // Retrieve children recursively for each root comment
     const commentsWithChildren = await Promise.all(
       comments.map((comment) => fetchCommentsWithChildren(comment.id)),
+    );
+
+    // Filter out any null comments (in case any weren't found)
+    const filteredCommentsWithChildren = commentsWithChildren.filter(
+      (comment) => comment !== null,
     );
 
     const post = await prisma.post.findUnique({
@@ -140,7 +155,7 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
       throw error;
     }
 
-    res.json({ ...post, comments: commentsWithChildren });
+    res.json({ ...post, comments: filteredCommentsWithChildren });
   } catch (err) {
     next(err);
   }
