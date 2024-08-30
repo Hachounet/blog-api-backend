@@ -66,7 +66,6 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
       where: {
         postId: req.params.postId,
         authorized: true,
-        parentId: null, // Ne récupérer que les commentaires racine
       },
       orderBy: {
         createdAt: "desc",
