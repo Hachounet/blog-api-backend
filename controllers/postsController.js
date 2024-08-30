@@ -44,16 +44,29 @@ exports.getAllPosts = asyncHandler(async (req, res, next) => {
 
 exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
   try {
-    console.log(req.params.postId);
+    const comments = await prisma.comment.findMany({
+      where: {
+        postId: req.params.postId,
+        authorized: true,
+        parentId: null, // Ne récupérer que les commentaires racine
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 10,
+    });
+
+    // Récupérer les enfants récursivement pour chaque commentaire racine
+    const commentsWithChildren = await Promise.all(
+      comments.map((comment) => fetchCommentsWithChildren(comment.id)),
+    );
+
     const post = await prisma.post.findUnique({
       where: {
         id: req.params.postId,
         published: true,
       },
       include: {
-        Comment: {
-          take: 10,
-        },
         author: {
           select: {
             pseudo: true,
@@ -68,7 +81,7 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
       throw error;
     }
 
-    res.json(post);
+    res.json({ ...post, comments: commentsWithChildren });
   } catch (err) {
     next(err);
   }
