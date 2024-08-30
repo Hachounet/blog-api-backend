@@ -73,16 +73,29 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
         authorized: true,
       },
       include: {
+        _count: {
+          select: {
+            Like: true, // Compter le nombre de likes pour chaque commentaire
+          },
+        },
         author: {
           select: {
             pseudo: true,
+          },
+        },
+        Likes: {
+          where: {
+            userId: req.user.id, // Vérifier si l'utilisateur connecté a liké le commentaire
+          },
+          select: {
+            id: true, // Inclure l'id du like pour identifier si l'utilisateur a liké ou non
           },
         },
       },
       orderBy: {
         createdAt: "asc",
       },
-      take: 10,
+      take: 10, // Limiter les résultats à 10 commentaires
     });
 
     // Récupérer les enfants récursivement pour chaque commentaire racine
