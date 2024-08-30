@@ -44,6 +44,19 @@ exports.getAllPosts = asyncHandler(async (req, res, next) => {
 
 exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
   async function fetchCommentsWithChildren(commentId) {
+    const includeLikes = req.user?.id
+      ? {
+          Likes: {
+            where: {
+              userId: req.user.id,
+            },
+            select: {
+              id: true,
+            },
+          },
+        }
+      : {}; // Include Likes if the user is logged in, otherwise an empty object
+
     const comment = await prisma.comment.findUnique({
       where: { id: commentId },
       include: {
@@ -59,17 +72,7 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
             Like: true,
           },
         },
-        Likes: req.user.id
-          ? {
-              // Check if the current user liked this comment only if the user is logged in
-              where: {
-                userId: req.user.id,
-              },
-              select: {
-                id: true,
-              },
-            }
-          : false, // If the user is not logged in, we skip fetching Likes
+        ...includeLikes, // Spread the includeLikes object
       },
     });
 
@@ -88,9 +91,20 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
     return comment;
   }
 
-  const potentialUser = req.user?.id || "unlogged"; // Handle potential undefined user ID
-
   try {
+    const includeLikes = req.user?.id
+      ? {
+          Likes: {
+            where: {
+              userId: req.user.id,
+            },
+            select: {
+              id: true,
+            },
+          },
+        }
+      : {}; // Include Likes if the user is logged in, otherwise an empty object
+
     const comments = await prisma.comment.findMany({
       where: {
         postId: req.params.postId,
@@ -107,17 +121,7 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
             pseudo: true,
           },
         },
-        Likes: req.user.id
-          ? {
-              // Fetch Likes only if the user is logged in
-              where: {
-                userId: req.user.id,
-              },
-              select: {
-                id: true,
-              },
-            }
-          : false, // If not logged in, skip fetching Likes
+        ...includeLikes, // Spread the includeLikes object
       },
       orderBy: {
         createdAt: "asc",
