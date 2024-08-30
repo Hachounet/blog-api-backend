@@ -47,16 +47,31 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
     const comment = await prisma.comment.findUnique({
       where: { id: commentId },
       include: {
-        Children: true, // Inclut tous les enfants de ce commentaire
+        Children: true, // Include all children of this comment
         author: {
           select: {
             pseudo: true,
           },
         },
+        _count: {
+          // Get the count of likes
+          select: {
+            Like: true,
+          },
+        },
+        Likes: {
+          // Check if the current user liked this comment
+          where: {
+            userId: req.user.id,
+          },
+          select: {
+            id: true,
+          },
+        },
       },
     });
 
-    // Si le commentaire a des enfants, appeler récursivement cette fonction sur chaque enfant
+    // If the comment has children, call this function recursively on each child
     if (comment.Children.length > 0) {
       comment.Children = await Promise.all(
         comment.Children.map((child) => fetchCommentsWithChildren(child.id)),
@@ -65,6 +80,8 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
 
     return comment;
   }
+
+  const potentialUser = req.user.id ? req.user.id : "unlogged";
 
   try {
     const comments = await prisma.comment.findMany({
@@ -75,7 +92,7 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
       include: {
         _count: {
           select: {
-            Like: true, // Compter le nombre de likes pour chaque commentaire
+            Like: true,
           },
         },
         author: {
@@ -85,20 +102,20 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
         },
         Likes: {
           where: {
-            userId: req.user.id, // Vérifier si l'utilisateur connecté a liké le commentaire
+            userId: req.user.id,
           },
           select: {
-            id: true, // Inclure l'id du like pour identifier si l'utilisateur a liké ou non
+            id: true,
           },
         },
       },
       orderBy: {
         createdAt: "asc",
       },
-      take: 10, // Limiter les résultats à 10 commentaires
+      take: 10,
     });
 
-    // Récupérer les enfants récursivement pour chaque commentaire racine
+    // Retrieve children recursively for each root comment
     const commentsWithChildren = await Promise.all(
       comments.map((comment) => fetchCommentsWithChildren(comment.id)),
     );
