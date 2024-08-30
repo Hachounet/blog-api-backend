@@ -43,6 +43,24 @@ exports.getAllPosts = asyncHandler(async (req, res, next) => {
 });
 
 exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
+  async function fetchCommentsWithChildren(commentId) {
+    const comment = await prisma.comment.findUnique({
+      where: { id: commentId },
+      include: {
+        Children: true, // Inclut tous les enfants de ce commentaire
+      },
+    });
+
+    // Si le commentaire a des enfants, appeler récursivement cette fonction sur chaque enfant
+    if (comment.Children.length > 0) {
+      comment.Children = await Promise.all(
+        comment.Children.map((child) => fetchCommentsWithChildren(child.id)),
+      );
+    }
+
+    return comment;
+  }
+
   try {
     const comments = await prisma.comment.findMany({
       where: {
