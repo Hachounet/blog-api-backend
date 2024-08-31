@@ -51,7 +51,7 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
               userId: req.user.id,
             },
             select: {
-              id: true, // Selecting the ID to check if the user has liked the comment
+              id: true,
             },
           },
         }
@@ -68,7 +68,7 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
         },
         _count: {
           select: {
-            Like: true, // Always get the total number of likes
+            Like: true,
           },
         },
         ...includeUserLikes,
@@ -79,10 +79,8 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
       return null;
     }
 
-    // Add a `userHasLiked` flag if the user is logged in
     comment.userHasLiked = req.user?.id ? comment.Likes.length > 0 : false;
 
-    // Recursively fetch children comments
     if (comment.Children.length > 0) {
       comment.Children = await Promise.all(
         comment.Children.map((child) => fetchCommentsWithChildren(child.id)),
@@ -114,7 +112,7 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
       include: {
         _count: {
           select: {
-            Like: true, // Always get the total number of likes
+            Like: true,
           },
         },
         author: {
@@ -122,6 +120,7 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
             pseudo: true,
           },
         },
+        Children: true,
         ...includeUserLikes,
       },
       orderBy: {
@@ -130,13 +129,10 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
       take: 10,
     });
 
-    // Process each comment to add `userHasLiked` flag
+    // Process each comment to add `userHasLiked` flag and its children
     const commentsWithChildren = await Promise.all(
       comments.map(async (comment) => {
         const commentWithChildren = await fetchCommentsWithChildren(comment.id);
-        commentWithChildren.userHasLiked = req.user?.id
-          ? commentWithChildren.Likes.length > 0
-          : false;
         return commentWithChildren;
       }),
     );
