@@ -43,104 +43,7 @@ exports.getAllPosts = asyncHandler(async (req, res, next) => {
 });
 
 exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
-  async function fetchCommentsWithChildren(commentId) {
-    const includeUserLikes = req.user?.id
-      ? {
-          Likes: {
-            where: {
-              userId: req.user.id,
-            },
-            select: {
-              id: true,
-            },
-          },
-        }
-      : {};
-
-    const comment = await prisma.comment.findUnique({
-      where: { id: commentId },
-      include: {
-        Children: true,
-        author: {
-          select: {
-            pseudo: true,
-          },
-        },
-        _count: {
-          select: {
-            Like: true,
-          },
-        },
-        ...includeUserLikes,
-      },
-    });
-
-    if (!comment) {
-      return null;
-    }
-
-    comment.userHasLiked = req.user?.id ? comment.Likes.length > 0 : false;
-
-    if (comment.Children.length > 0) {
-      comment.Children = await Promise.all(
-        comment.Children.map((child) => fetchCommentsWithChildren(child.id)),
-      );
-    }
-
-    return comment;
-  }
-
   try {
-    const includeUserLikes = req.user?.id
-      ? {
-          Likes: {
-            where: {
-              userId: req.user.id,
-            },
-            select: {
-              id: true,
-            },
-          },
-        }
-      : {};
-
-    const comments = await prisma.comment.findMany({
-      where: {
-        postId: req.params.postId,
-        authorized: true,
-      },
-      include: {
-        _count: {
-          select: {
-            Like: true,
-          },
-        },
-        author: {
-          select: {
-            pseudo: true,
-          },
-        },
-        Children: true,
-        ...includeUserLikes,
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
-      take: 10,
-    });
-
-    // Process each comment to add `userHasLiked` flag and its children
-    const commentsWithChildren = await Promise.all(
-      comments.map(async (comment) => {
-        const commentWithChildren = await fetchCommentsWithChildren(comment.id);
-        return commentWithChildren;
-      }),
-    );
-
-    const filteredCommentsWithChildren = commentsWithChildren.filter(
-      (comment) => comment !== null,
-    );
-
     const post = await prisma.post.findUnique({
       where: {
         id: req.params.postId,
@@ -161,11 +64,70 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
       throw error;
     }
 
-    res.json({ ...post, comments: filteredCommentsWithChildren });
+    const comments = await fetchCommentsRecursive(
+      req.params.postId,
+      req.user?.id,
+    );
+
+    res.json({ ...post, comments });
   } catch (err) {
     next(err);
   }
 });
+
+async function fetchCommentsRecursive(postId, userId, parentId = null) {
+  const includeUserLikes = userId
+    ? {
+        Likes: {
+          where: { userId },
+          select: { id: true, userId: true },
+        },
+      }
+    : {};
+
+  const comments = await prisma.comment.findMany({
+    where: {
+      postId,
+      parentId,
+      authorized: true,
+    },
+    include: {
+      author: {
+        select: {
+          pseudo: true,
+        },
+      },
+      _count: {
+        select: {
+          Like: true,
+        },
+      },
+      Children: true,
+      ...includeUserLikes,
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+    take: 10,
+  });
+
+  return await Promise.all(
+    comments.map(async (comment) => {
+      comment.userHasLiked = userId
+        ? comment.Likes.some((like) => like.userId === userId)
+        : false;
+
+      if (comment.Children.length > 0) {
+        comment.Children = await fetchCommentsRecursive(
+          postId,
+          userId,
+          comment.id,
+        );
+      }
+      return comment;
+    }),
+  );
+}
 
 exports.getSpecificPostPageComments = asyncHandler(async (req, res, next) => {
   const page = parseInt(req.query.page) || 0;
