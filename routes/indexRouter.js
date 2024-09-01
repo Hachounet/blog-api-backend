@@ -13,7 +13,10 @@ const {
   getProfilePage,
 } = require("../controllers/indexController");
 
-const authenticateJWT = require("../auth/passport");
+const {
+  authenticateJWT,
+  optionalAuthenticateJWT,
+} = require("../auth/passport");
 
 const indexRouter = Router();
 
