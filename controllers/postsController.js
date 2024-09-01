@@ -78,7 +78,7 @@ exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
 async function fetchCommentsRecursive(postId, userId, parentId = null) {
   const includeUserLikes = userId
     ? {
-        Likes: {
+        Like: {
           where: { userId },
           select: { id: true, userId: true },
         },
@@ -114,7 +114,7 @@ async function fetchCommentsRecursive(postId, userId, parentId = null) {
   return await Promise.all(
     comments.map(async (comment) => {
       comment.userHasLiked = userId
-        ? comment.Likes.some((like) => like.userId === userId)
+        ? comment.Like.some((like) => like.userId === userId)
         : false;
 
       if (comment.Children.length > 0) {
