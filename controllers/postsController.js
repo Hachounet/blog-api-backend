@@ -80,7 +80,7 @@ async function fetchCommentsRecursive(postId, userId, parentId = null) {
     ? {
         Like: {
           where: { userId },
-          select: { id: true, userId: true },
+          select: { userId: true, commentId: true },
         },
       }
     : {};
