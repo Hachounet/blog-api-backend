@@ -206,6 +206,7 @@ exports.postCommentAndLikesOnSpecificPostPage = asyncHandler(
         content: req.query.comment,
         authorId: req.user.id,
         postId: req.params.postId,
+        authorized: true,
       };
 
       // If there's a parentComment, it means this is a reply
