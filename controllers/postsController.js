@@ -132,19 +132,16 @@ async function fetchCommentsRecursive(postId, userId, parentId = null) {
 exports.getSpecificPostPageComments = asyncHandler(async (req, res, next) => {
   const page = parseInt(req.query.page) || 0;
   const limit = 10;
+  const userId = req.user?.id;
 
   try {
-    const comments = await prisma.comment.findMany({
-      where: {
-        postId: req.params.postId,
-        authorized: true,
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
-      skip: page * limit,
-      take: limit,
-    });
+    const comments = await fetchCommentsRecursive(
+      req.params.postId,
+      userId,
+      null,
+      page,
+      limit,
+    );
 
     if (!comments.length) {
       return res.json({ commentsEmpty: true });
@@ -154,6 +151,67 @@ exports.getSpecificPostPageComments = asyncHandler(async (req, res, next) => {
     next(err);
   }
 });
+
+async function fetchCommentsRecursive(
+  postId,
+  userId,
+  parentId = null,
+  page = 0,
+  limit = 10,
+) {
+  const includeUserLikes = userId
+    ? {
+        Like: {
+          where: { userId },
+          select: { userId: true, commentId: true },
+        },
+      }
+    : {};
+
+  const comments = await prisma.comment.findMany({
+    where: {
+      postId,
+      parentId,
+      authorized: true,
+    },
+    include: {
+      author: {
+        select: {
+          pseudo: true,
+        },
+      },
+      _count: {
+        select: {
+          Like: true,
+        },
+      },
+      Children: true,
+      ...includeUserLikes,
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+    skip: page * limit,
+    take: limit,
+  });
+
+  return await Promise.all(
+    comments.map(async (comment) => {
+      comment.userHasLiked = userId
+        ? comment.Like.some((like) => like.userId === userId)
+        : false;
+
+      if (comment.Children.length > 0) {
+        comment.Children = await fetchCommentsRecursive(
+          postId,
+          userId,
+          comment.id,
+        );
+      }
+      return comment;
+    }),
+  );
+}
 
 exports.postCommentAndLikesOnSpecificPostPage = asyncHandler(
   async (req, res, next) => {
