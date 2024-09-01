@@ -15,7 +15,7 @@ const {
   postUpdatePostPage,
 } = require("../controllers/dashboardController");
 
-const authenticateJWT = require("../auth/passport");
+const { authenticateJWT } = require("../auth/passport");
 const { isEditor } = require("../auth/editorMiddleware");
 
 dashboardRouter.use(authenticateJWT);
