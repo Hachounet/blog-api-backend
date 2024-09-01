@@ -216,6 +216,7 @@ exports.postCommentAndLikesOnSpecificPostPage = asyncHandler(
 
       const newComment = await prisma.comment.create({
         data: commentData,
+        include: { author: { select: { pseudo: true } } },
       });
 
       return res
