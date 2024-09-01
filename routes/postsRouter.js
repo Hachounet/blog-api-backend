@@ -10,16 +10,16 @@ const {
 const {
   authenticateJWT,
   optionalAuthenticateJWT,
+  twoStrategies,
 } = require("../auth/passport");
-const customAuthenticateJWT = require("../auth/customAuthenticateJWT");
 
 postsRouter.get("/", getAllPosts);
 
-postsRouter.get("/:postId", customAuthenticateJWT, getSpecificPostPage);
+postsRouter.get("/:postId", twoStrategies, getSpecificPostPage);
 
 postsRouter.get(
   "/:postId/comments/:commentsPage",
-  customAuthenticateJWT,
+  twoStrategies,
   getSpecificPostPageComments,
 );
 
