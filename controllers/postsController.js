@@ -130,7 +130,7 @@ async function fetchCommentsRecursive(postId, userId, parentId = null) {
 }
 
 exports.getSpecificPostPageComments = asyncHandler(async (req, res, next) => {
-  const page = parseInt(req.query.page) || 0;
+  const page = parseInt(req.params.commentsPage) || 0;
   const limit = 10;
   const userId = req.user?.id;
 
