@@ -14,7 +14,7 @@ const optionalAuthenticateJWT = require("../auth/optionalPassport");
 
 postsRouter.get("/", getAllPosts);
 
-postsRouter.get("/:postId", getSpecificPostPage);
+postsRouter.get("/:postId", optionalAuthenticateJWT, getSpecificPostPage);
 
 postsRouter.get(
   "/:postId/comments/:commentsPage",
