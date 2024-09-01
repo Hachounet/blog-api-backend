@@ -9,16 +9,14 @@ const prisma = new PrismaClient();
 const options = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET,
+  ignoreExpiration: true,
 };
 
 passport.use(
   new Strategy(options, async (payload, done) => {
     try {
-      const user = await prisma.user.findUnique({ where: { id: payload.id } });
-      if (user) return done(null, user);
-      else {
-        return done(null, null); // If user not found, will pass user to req.user for next middleware
-      }
+      const user = payload.id;
+      return done(null, user);
     } catch (err) {
       return done(err);
     }
