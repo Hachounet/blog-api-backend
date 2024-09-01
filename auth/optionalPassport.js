@@ -17,7 +17,7 @@ passport.use(
       const user = await prisma.user.findUnique({ where: { id: payload.id } });
       if (user) return done(null, user);
       else {
-        return done(null, user); // If user not found, will pass user to req.user for next middleware
+        return done(null, null); // If user not found, will pass user to req.user for next middleware
       }
     } catch (err) {
       return done(err);
