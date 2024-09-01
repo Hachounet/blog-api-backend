@@ -1,7 +1,5 @@
 const { Router } = require("express");
-
 const postsRouter = Router();
-
 const {
   getAllPosts,
   getSpecificPostPage,
@@ -9,8 +7,10 @@ const {
   postCommentAndLikesOnSpecificPostPage,
 } = require("../controllers/postsController");
 
-const authenticateJWT = require("../auth/passport");
-const optionalAuthenticateJWT = require("../auth/optionalPassport");
+const {
+  authenticateJWT,
+  optionalAuthenticateJWT,
+} = require("../auth/passport");
 const customAuthenticateJWT = require("../auth/customAuthenticateJWT");
 
 postsRouter.get("/", getAllPosts);
@@ -19,7 +19,7 @@ postsRouter.get("/:postId", customAuthenticateJWT, getSpecificPostPage);
 
 postsRouter.get(
   "/:postId/comments/:commentsPage",
-  optionalAuthenticateJWT,
+  customAuthenticateJWT,
   getSpecificPostPageComments,
 );
 

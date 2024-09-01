@@ -1,17 +1,13 @@
-const passport = require("passport");
+const { optionalAuthenticateJWT } = require("./passport");
 
 function customAuthenticateJWT(req, res, next) {
-  passport.authenticate("jwt", { session: false }, (err, user) => {
+  optionalAuthenticateJWT(req, res, (err, user) => {
     if (err) {
-      return next();
+      return next(err);
     }
-    if (!user) {
-      req.user = null;
-    } else {
-      req.user = user;
-    }
+    req.user = user || null; // Assign user or null if not found
     next();
-  })(req, res, next);
+  });
 }
 
 module.exports = customAuthenticateJWT;

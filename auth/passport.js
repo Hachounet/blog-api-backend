@@ -9,7 +9,14 @@ const options = {
   secretOrKey: process.env.JWT_SECRET,
 };
 
+const unprotectedOptions = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.JWT_SECRET,
+  ignoreExpiration: true,
+};
+
 passport.use(
+  "classic-protected",
   new Strategy(options, async (payload, done) => {
     try {
       const user = await prisma.user.findUnique({ where: { id: payload.id } });
@@ -23,6 +30,23 @@ passport.use(
   }),
 );
 
-const authenticateJWT = passport.authenticate("jwt", { session: false });
+passport.use(
+  "unprotected-route",
+  new Strategy(unprotectedOptions, async (payload, done) => {
+    try {
+      const user = payload ? payload.id : null;
+      return done(null, user);
+    } catch (err) {
+      return done(err);
+    }
+  }),
+);
 
-module.exports = authenticateJWT;
+const authenticateJWT = passport.authenticate("classic-protected", {
+  session: false,
+});
+const optionalAuthenticateJWT = passport.authenticate("unprotected-route", {
+  session: false,
+});
+
+module.exports = { authenticateJWT, optionalAuthenticateJWT };
