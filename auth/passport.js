@@ -1,4 +1,5 @@
 const { ExtractJwt, Strategy } = require("passport-jwt");
+const { Strategy: anoStrategy } = require("passport-anonymous");
 const passport = require("passport");
 const { PrismaClient } = require("@prisma/client");
 
@@ -7,12 +8,6 @@ const prisma = new PrismaClient();
 const options = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET,
-};
-
-const unprotectedOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET,
-  ignoreExpiration: true,
 };
 
 passport.use(
@@ -30,17 +25,7 @@ passport.use(
   }),
 );
 
-passport.use(
-  "unprotected-route",
-  new Strategy(unprotectedOptions, async (payload, done) => {
-    try {
-      const user = payload ? payload.id : null;
-      return done(null, user);
-    } catch (err) {
-      return done(err);
-    }
-  }),
-);
+passport.use("unprotected-route", new anoStrategy());
 
 const authenticateJWT = passport.authenticate("classic-protected", {
   session: false,
@@ -49,4 +34,9 @@ const optionalAuthenticateJWT = passport.authenticate("unprotected-route", {
   session: false,
 });
 
-module.exports = { authenticateJWT, optionalAuthenticateJWT };
+const twoStrategies = passport.authenticate(
+  ["classic-protected", "unprotected-route"],
+  { session: false },
+);
+
+module.exports = { authenticateJWT, optionalAuthenticateJWT, twoStrategies };
