@@ -15,7 +15,7 @@ const options = {
 passport.use(
   new Strategy(options, async (payload, done) => {
     try {
-      const user = payload.id;
+      const user = payload ? payload.id : null;
       return done(null, user);
     } catch (err) {
       return done(err);
