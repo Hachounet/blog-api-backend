@@ -10,12 +10,17 @@ const {
 } = require("../controllers/postsController");
 
 const authenticateJWT = require("../auth/passport");
+const optionalAuthenticateJWT = require("../auth/optionalPassport");
 
 postsRouter.get("/", getAllPosts);
 
 postsRouter.get("/:postId", getSpecificPostPage);
 
-postsRouter.get("/:postId/comments/:commentsPage", getSpecificPostPageComments);
+postsRouter.get(
+  "/:postId/comments/:commentsPage",
+  optionalAuthenticateJWT,
+  getSpecificPostPageComments,
+);
 
 postsRouter.post(
   "/:postId",
