@@ -13,15 +13,18 @@ const {
   postDeletePage,
   getUpdatePostPage,
   postUpdatePostPage,
+  getDraftsPage,
 } = require("../controllers/dashboardController");
 
-const { authenticateJWT } = require("../auth/passport");
-const { isEditor } = require("../auth/editorMiddleware");
+// const { authenticateJWT } = require("../auth/passport");
+// const { isEditor } = require("../auth/editorMiddleware");
 
-dashboardRouter.use(authenticateJWT);
-dashboardRouter.use(isEditor);
+// dashboardRouter.use(authenticateJWT);
+// dashboardRouter.use(isEditor);
 
 dashboardRouter.get("/", getDashboardPage);
+
+dashboardRouter.get("/drafts", getDraftsPage);
 
 dashboardRouter.get("/create", getCreatePostPage);
 

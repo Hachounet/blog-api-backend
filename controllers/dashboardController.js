@@ -17,6 +17,16 @@ exports.getDashboardPage = asyncHandler(async (req, res, next) => {
   return res.status(200).json({ drafts, commentsToCheck });
 });
 
+exports.getDraftsPage = asyncHandler(async (req, res, next) => {
+  const drafts = await prisma.post.findMany({
+    where: {
+      published: false,
+    },
+  });
+
+  return res.status(200).json({ drafts });
+});
+
 exports.getCreatePostPage = asyncHandler(async (req, res, next) => {
   console.log("Check if needed with Front end ");
   res.json({ message: "Maybe not needed." });
