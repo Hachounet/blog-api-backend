@@ -22,6 +22,13 @@ exports.getDraftsPage = asyncHandler(async (req, res, next) => {
     where: {
       published: false,
     },
+    include: {
+      author: {
+        select: {
+          pseudo: true,
+        },
+      },
+    },
   });
 
   return res.status(200).json({ drafts });
