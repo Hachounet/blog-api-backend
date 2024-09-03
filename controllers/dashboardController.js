@@ -2,8 +2,8 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const asyncHandler = require("express-async-handler");
 
-exports.getDashboardPage = asyncHandler(async (req, res, next) => {
-  const allPosts = await prisma.post.findMany({
+exports.getAllPostsPage = asyncHandler(async (req, res, next) => {
+  const posts = await prisma.post.findMany({
     orderBy: {
       published: "asc",
     },
@@ -26,8 +26,7 @@ exports.getDashboardPage = asyncHandler(async (req, res, next) => {
       Content: true,
     },
   });
-
-  return res.status(200).json({ allPosts });
+  res.json({ posts });
 });
 
 exports.getDraftsPage = asyncHandler(async (req, res, next) => {
@@ -55,11 +54,6 @@ exports.getCreatePostPage = asyncHandler(async (req, res, next) => {
 exports.postCreatePostPage = asyncHandler(async (req, res, next) => {
   console.log("Check with Front end");
   res.json({ message: "Check after front end" });
-});
-
-exports.getAllPostsPage = asyncHandler(async (req, res, next) => {
-  const posts = await prisma.post.findMany();
-  res.json({ posts });
 });
 
 exports.getCommentsPage = asyncHandler(async (req, res, next) => {

@@ -3,7 +3,6 @@ const { Router } = require("express");
 const dashboardRouter = Router();
 
 const {
-  getDashboardPage,
   getCreatePostPage,
   postCreatePostPage,
   getAllPostsPage,
@@ -22,7 +21,7 @@ const {
 // dashboardRouter.use(authenticateJWT);
 // dashboardRouter.use(isEditor);
 
-dashboardRouter.get("/", getDashboardPage);
+dashboardRouter.get("/", getAllPostsPage);
 
 dashboardRouter.get("/drafts", getDraftsPage);
 
