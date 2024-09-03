@@ -71,17 +71,19 @@ exports.getCommentsPage = asyncHandler(async (req, res, next) => {
 });
 
 exports.postCommentsPage = asyncHandler(async (req, res, next) => {
-  if (req.query.authorized === false) {
+  if (req.query.authorized === "false") {
     await prisma.comment.delete({
       where: {
         id: req.query.commentId,
       },
     });
-  } else if (req.query.authorized === true) {
+  } else if (req.query.authorized === "true") {
     await prisma.comment.update({
       where: {
         id: req.query.commentId,
-        authorized: req.query.authorized,
+      },
+      data: {
+        authorized: true,
       },
     });
   }
