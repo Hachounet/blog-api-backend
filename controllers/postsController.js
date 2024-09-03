@@ -5,41 +5,33 @@ const { body, validationResult } = require("express-validator");
 
 exports.getAllPosts = asyncHandler(async (req, res, next) => {
   console.log("All posts page");
-  try {
-    const allPosts = await prisma.post.findMany({
-      take: 10,
-      orderBy: {
-        createdAt: "desc",
-      },
-      select: {
-        id: true,
-        createdAt: true,
-        title: true,
-        published: true,
 
-        author: {
-          select: {
-            pseudo: true,
-          },
-        },
-        _count: {
-          select: {
-            Comment: true,
-          },
-        },
-        Content: true,
-      },
-    });
+  const allPosts = await prisma.post.findMany({
+    take: 10,
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      id: true,
+      createdAt: true,
+      title: true,
+      published: true,
 
-    if (!allPosts) {
-      const error = new Error("All posts not found.");
-      error.statusCode = 404;
-      throw error;
-    }
-    res.json(allPosts);
-  } catch (err) {
-    next(err);
-  }
+      author: {
+        select: {
+          pseudo: true,
+        },
+      },
+      _count: {
+        select: {
+          Comment: true,
+        },
+      },
+      Content: true,
+    },
+  });
+
+  res.json(allPosts);
 });
 
 exports.getSpecificPostPage = asyncHandler(async (req, res, next) => {
