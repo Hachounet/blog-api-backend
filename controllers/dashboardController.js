@@ -3,18 +3,31 @@ const prisma = new PrismaClient();
 const asyncHandler = require("express-async-handler");
 
 exports.getDashboardPage = asyncHandler(async (req, res, next) => {
-  const drafts = await prisma.post.findMany({
-    where: {
-      published: false,
+  const allPosts = await prisma.post.findMany({
+    orderBy: {
+      published: "asc",
     },
-  });
-  const commentsToCheck = await prisma.comment.findMany({
-    where: {
-      authorized: false,
+    select: {
+      id: true,
+      createdAt: true,
+      title: true,
+      published: true,
+
+      author: {
+        select: {
+          pseudo: true,
+        },
+      },
+      _count: {
+        select: {
+          Comment: true,
+        },
+      },
+      Content: true,
     },
   });
 
-  return res.status(200).json({ drafts, commentsToCheck });
+  return res.status(200).json({ allPosts });
 });
 
 exports.getDraftsPage = asyncHandler(async (req, res, next) => {
