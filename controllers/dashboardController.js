@@ -59,6 +59,13 @@ exports.postCreatePostPage = asyncHandler(async (req, res, next) => {
 exports.getCommentsPage = asyncHandler(async (req, res, next) => {
   const comments = await prisma.comment.findMany({
     where: { authorized: false },
+    include: {
+      author: {
+        select: {
+          pseudo: true,
+        },
+      },
+    },
   });
   res.json({ comments });
 });
