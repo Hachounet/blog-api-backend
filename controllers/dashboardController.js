@@ -77,7 +77,7 @@ exports.postCommentsPage = asyncHandler(async (req, res, next) => {
         id: req.query.commentId,
       },
     });
-  } else {
+  } else if (req.query.authorized === true) {
     await prisma.comment.update({
       where: {
         id: req.query.commentId,
@@ -85,8 +85,17 @@ exports.postCommentsPage = asyncHandler(async (req, res, next) => {
       },
     });
   }
-
-  res.status(200).json({ message: "Comment edited." });
+  const comments = await prisma.comment.findMany({
+    where: { authorized: false },
+    include: {
+      author: {
+        select: {
+          pseudo: true,
+        },
+      },
+    },
+  });
+  res.json({ comments });
 });
 
 exports.getDeletePage = asyncHandler(async (req, res, next) => {
