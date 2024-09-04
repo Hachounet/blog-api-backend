@@ -3,12 +3,11 @@ const { Router } = require("express");
 const dashboardRouter = Router();
 
 const {
-  getCreatePostPage,
+  getAllPostsPage,
   postCreatePostPage,
   getAllPostsPage,
   getCommentsPage,
   postCommentsPage,
-  getDeletePage,
   postDeletePage,
   getUpdatePostPage,
   postUpdatePostPage,
