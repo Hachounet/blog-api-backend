@@ -15,17 +15,15 @@ const {
   getDraftsPage,
 } = require("../controllers/dashboardController");
 
-// const { authenticateJWT } = require("../auth/passport");
-// const { isEditor } = require("../auth/editorMiddleware");
+const { authenticateJWT } = require("../auth/passport");
+const { isEditor } = require("../auth/editorMiddleware");
 
-// dashboardRouter.use(authenticateJWT);
-// dashboardRouter.use(isEditor);
+dashboardRouter.use(authenticateJWT);
+dashboardRouter.use(isEditor);
 
 dashboardRouter.get("/", getAllPostsPage);
 
 dashboardRouter.get("/drafts", getDraftsPage);
-
-dashboardRouter.get("/create", getCreatePostPage);
 
 dashboardRouter.post("/create", postCreatePostPage);
 
@@ -34,8 +32,6 @@ dashboardRouter.get("/all", getAllPostsPage);
 dashboardRouter.get("/comments", getCommentsPage);
 
 dashboardRouter.post("/comments", postCommentsPage);
-
-dashboardRouter.get("/delete", getDeletePage);
 
 dashboardRouter.post("/delete", postDeletePage);
 
