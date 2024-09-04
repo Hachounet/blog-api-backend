@@ -62,6 +62,9 @@ exports.getLandingPage = asyncHandler(async (req, res, next) => {
   console.log("Landing Page");
 
   const allPosts = await prisma.post.findMany({
+    where: {
+      published: true,
+    },
     take: 10,
     orderBy: {
       createdAt: "desc", // Trier par date de création (ordre décroissant)
