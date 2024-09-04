@@ -122,6 +122,22 @@ exports.postDeletePage = asyncHandler(async (req, res, next) => {
   return res.status(200).json({ message: "Post is successfully deleted!" });
 });
 
+exports.getUpdatePostPage = asyncHandler(async (req, res, next) => {
+  const { postId } = req.query;
+
+  const postToUpdate = await prisma.post.findUnique({
+    where: {
+      id: postId,
+    },
+    select: {
+      Content: true,
+      title: true,
+    },
+  });
+
+  res.status(200).json({ postToUpdate });
+});
+
 exports.postUpdatePostPage = asyncHandler(async (req, res, next) => {
   const { postId } = req.query;
   const { title, content } = req.body;
