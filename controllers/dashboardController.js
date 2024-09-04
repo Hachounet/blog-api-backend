@@ -46,14 +46,20 @@ exports.getDraftsPage = asyncHandler(async (req, res, next) => {
   return res.status(200).json({ drafts });
 });
 
-exports.getCreatePostPage = asyncHandler(async (req, res, next) => {
-  console.log("Check if needed with Front end ");
-  res.json({ message: "Maybe not needed." });
-});
-
 exports.postCreatePostPage = asyncHandler(async (req, res, next) => {
-  console.log("Check with Front end");
-  res.json({ message: "Check after front end" });
+  const { title, content, authorId } = req.body;
+
+  await prisma.post.create({
+    data: {
+      title: title,
+      Content: content,
+      authorId: authorId,
+    },
+  });
+
+  res
+    .status(201)
+    .json({ message: "Post have been successfully send to DB ! " });
 });
 
 exports.getCommentsPage = asyncHandler(async (req, res, next) => {
@@ -100,26 +106,44 @@ exports.postCommentsPage = asyncHandler(async (req, res, next) => {
   res.json({ comments });
 });
 
-exports.getDeletePage = asyncHandler(async (req, res, next) => {
-  console.log("Probably not needed");
-  res.json({ message: " Probably not needed." });
-});
-
 exports.postDeletePage = asyncHandler(async (req, res, next) => {
-  console.log("brr");
+  const { postId } = req.query;
+
+  if (!postId) {
+    return res.status(400).json({ message: "postId is required" });
+  }
+
   await prisma.post.delete({
     where: {
-      id: req.query.postId,
+      id: postId,
     },
   });
-});
 
-exports.getUpdatePostPage = asyncHandler(async (req, res, next) => {
-  console.log("Probably not needed");
-  res.json({ message: "Probably not needed. Check with front end." });
+  return res.status(200).json({ message: "Post is successfully deleted!" });
 });
 
 exports.postUpdatePostPage = asyncHandler(async (req, res, next) => {
-  console.log("Check after front end");
-  res.json({ message: "Check after front end." });
+  const { postId } = req.query;
+  const { title, content } = req.body;
+
+  if (!postId) {
+    return res.status(400).json({ message: "postId is required" });
+  }
+  if (!title && !content) {
+    return res
+      .status(400)
+      .json({ message: "Title or content must be provided." });
+  }
+
+  await prisma.post.update({
+    where: {
+      id: postId,
+    },
+    data: {
+      title: title,
+      content: content,
+    },
+  });
+
+  return res.status(200).json({ message: "Post is successfully updated." });
 });
