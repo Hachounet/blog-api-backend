@@ -7,6 +7,9 @@ exports.getAllPosts = asyncHandler(async (req, res, next) => {
   console.log("All posts page");
 
   const allPosts = await prisma.post.findMany({
+    where: {
+      published: true,
+    },
     take: 10,
     orderBy: {
       createdAt: "desc",
