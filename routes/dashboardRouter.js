@@ -4,14 +4,13 @@ const dashboardRouter = Router();
 
 const {
   getAllPostsPage,
+  getDraftsPage,
   postCreatePostPage,
-  getAllPostsPage,
   getCommentsPage,
   postCommentsPage,
   postDeletePage,
   getUpdatePostPage,
   postUpdatePostPage,
-  getDraftsPage,
 } = require("../controllers/dashboardController");
 
 const { authenticateJWT } = require("../auth/passport");
