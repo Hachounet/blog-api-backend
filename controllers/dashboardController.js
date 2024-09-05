@@ -47,7 +47,12 @@ exports.getDraftsPage = asyncHandler(async (req, res, next) => {
 });
 
 exports.postCreatePostPage = asyncHandler(async (req, res, next) => {
-  const { title, content, authorId } = req.body;
+  const { title, content } = req.body;
+  const authorId = req.user.id;
+
+  if (!title || !content) {
+    return res.status(400).json({ message: "Title and content are required" });
+  }
 
   await prisma.post.create({
     data: {

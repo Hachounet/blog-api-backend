@@ -98,21 +98,17 @@ exports.getLoginPage = (req, res, next) => {
 exports.postLoginPage = asyncHandler(async (req, res, next) => {
   console.log("POST Login Page for:", req.body.email);
 
-  // Initialiser un tableau pour stocker les erreurs
   const errors = [];
 
-  // Check if user exists
   const user = await prisma.user.findUnique({
     where: { email: req.body.email },
   });
 
-  // Vérifier si l'utilisateur existe
   if (!user) {
     errors.push({ msg: "Invalid email." });
   }
 
-  // Compare the password only if the user exists
-  let isPasswordValid = true; // Assume true if user does not exist
+  let isPasswordValid = true;
   if (user) {
     isPasswordValid = await bcrypt.compare(req.body.pw, user.hash);
     if (!isPasswordValid) {
@@ -120,12 +116,10 @@ exports.postLoginPage = asyncHandler(async (req, res, next) => {
     }
   }
 
-  // Si des erreurs ont été trouvées, retourner les erreurs
   if (errors.length > 0) {
     return res.status(400).json({ errors });
   }
 
-  // Générer le token si aucune erreur n'est trouvée
   const accessToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
     expiresIn: "3600000",
   });
