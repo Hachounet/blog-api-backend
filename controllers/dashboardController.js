@@ -26,7 +26,13 @@ exports.getAllPostsPage = asyncHandler(async (req, res, next) => {
       Content: true,
     },
   });
-  res.json({ posts });
+
+  const cleanedPosts = posts.map((post) => ({
+    ...post,
+    Content: striptags(post.Content),
+  }));
+
+  res.json({ posts: cleanedPosts });
 });
 
 exports.getDraftsPage = asyncHandler(async (req, res, next) => {
@@ -43,7 +49,12 @@ exports.getDraftsPage = asyncHandler(async (req, res, next) => {
     },
   });
 
-  return res.status(200).json({ drafts });
+  const cleanedDrafts = drafts.map((draft) => ({
+    ...draft,
+    Content: striptags(draft.Content),
+  }));
+
+  return res.status(200).json({ drafts: cleanedDrafts });
 });
 
 exports.postCreatePostPage = asyncHandler(async (req, res, next) => {
