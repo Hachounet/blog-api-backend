@@ -1,6 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const asyncHandler = require("express-async-handler");
+const striptags = require("striptags");
 
 exports.getAllPostsPage = asyncHandler(async (req, res, next) => {
   const posts = await prisma.post.findMany({
