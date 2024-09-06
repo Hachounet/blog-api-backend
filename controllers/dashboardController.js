@@ -174,7 +174,7 @@ exports.putUpdatePostPage = asyncHandler(async (req, res, next) => {
     },
     data: {
       title: title,
-      content: content,
+      Content: content,
     },
   });
 
