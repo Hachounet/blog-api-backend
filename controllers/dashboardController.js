@@ -180,3 +180,38 @@ exports.putUpdatePostPage = asyncHandler(async (req, res, next) => {
 
   return res.status(200).json({ message: "Post is successfully updated." });
 });
+
+exports.putPublishPostPage = asyncHandler(async (req, res, next) => {
+  const { postId } = req.query;
+
+  if (!postId) {
+    return res.status(400).json({ message: "postId is required." });
+  }
+
+  const post = await prisma.post.findUnique({
+    where: {
+      id: postId,
+    },
+    select: {
+      published: true,
+    },
+  });
+
+  if (!post) {
+    return res.status(404).json({ message: "Post not found." });
+  }
+
+  const updatedPost = await prisma.post.update({
+    where: {
+      id: postId,
+    },
+    data: {
+      published: !post.published,
+    },
+  });
+
+  return res.status(200).json({
+    message: "Post publish status is updated.",
+    published: updatedPost.published,
+  });
+});
