@@ -33,8 +33,8 @@ dashboardRouter.post("/comments", postCommentsPage);
 
 dashboardRouter.post("/delete", postDeletePage);
 
-dashboardRouter.get("/:postId/update", getUpdatePostPage);
+dashboardRouter.get("/update", getUpdatePostPage);
 
-dashboardRouter.post("/:postId/update", postUpdatePostPage);
+dashboardRouter.post("/update", postUpdatePostPage);
 
 module.exports = dashboardRouter;

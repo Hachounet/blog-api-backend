@@ -140,7 +140,7 @@ exports.postDeletePage = asyncHandler(async (req, res, next) => {
 });
 
 exports.getUpdatePostPage = asyncHandler(async (req, res, next) => {
-  const { postId } = req.params;
+  const { postId } = req.query;
 
   const postToUpdate = await prisma.post.findUnique({
     where: {
@@ -156,7 +156,7 @@ exports.getUpdatePostPage = asyncHandler(async (req, res, next) => {
 });
 
 exports.postUpdatePostPage = asyncHandler(async (req, res, next) => {
-  const { postId } = req.params;
+  const { postId } = req.query;
   const { title, content } = req.body;
 
   if (!postId) {
