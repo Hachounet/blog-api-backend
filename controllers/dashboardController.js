@@ -155,7 +155,7 @@ exports.getUpdatePostPage = asyncHandler(async (req, res, next) => {
   res.status(200).json({ postToUpdate });
 });
 
-exports.postUpdatePostPage = asyncHandler(async (req, res, next) => {
+exports.putUpdatePostPage = asyncHandler(async (req, res, next) => {
   const { postId } = req.query;
   const { title, content } = req.body;
 

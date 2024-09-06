@@ -10,7 +10,7 @@ const {
   postCommentsPage,
   postDeletePage,
   getUpdatePostPage,
-  postUpdatePostPage,
+  putUpdatePostPage,
 } = require("../controllers/dashboardController");
 
 const { authenticateJWT } = require("../auth/passport");
@@ -35,6 +35,6 @@ dashboardRouter.post("/delete", postDeletePage);
 
 dashboardRouter.get("/update", getUpdatePostPage);
 
-dashboardRouter.post("/update", postUpdatePostPage);
+dashboardRouter.put("/update", putUpdatePostPage);
 
 module.exports = dashboardRouter;
